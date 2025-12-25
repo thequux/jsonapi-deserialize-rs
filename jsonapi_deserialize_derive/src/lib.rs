@@ -256,11 +256,19 @@ fn impl_json_api_deserialize(input: &DeriveInput) -> proc_macro2::TokenStream {
         fields.extend(quote! { #field_name, });
     });
 
+    let gc_lifetime = quote!{'gc};
+    let (struct_generics, static_generic) = if input_receiver.generics.params.is_empty() {
+        (quote! {}, quote!{})
+    } else {
+        (quote!{<'gc>}, quote!{<'static>})
+    };
+
     quote! {
-        impl jsonapi_deserialize::JsonApiDeserialize for #struct_name {
+        impl<#gc_lifetime> jsonapi_deserialize::JsonApiDeserialize<#gc_lifetime> for #struct_name #struct_generics {
+            type ErasedLifetime = #struct_name #static_generic;
             fn from_value(
                 value: &serde_json::Value,
-                included_map: &mut jsonapi_deserialize::IncludedMap,
+                included_map: &mut jsonapi_deserialize::IncludedMap<'_, #gc_lifetime>,
             ) -> Result<Self, jsonapi_deserialize::DeserializeError> {
                 use jsonapi_deserialize::DeserializeError as Error;
 
@@ -285,6 +293,9 @@ fn impl_json_api_deserialize(input: &DeriveInput) -> proc_macro2::TokenStream {
                 Ok(Self {
                     #fields
                 })
+            }
+            fn stub() -> Self {
+                Default::default()
             }
         }
     }

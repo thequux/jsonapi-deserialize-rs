@@ -9,3 +9,5 @@ serde_json = "1.0.132"
 serde = { version = "1.0.214", features = ["derive"] }
 jsonapi_deserialize = { version = "0", path = "../jsonapi_deserialize" }
 jsonapi_deserialize_derive = { version = "0", path = "../jsonapi_deserialize_derive" }
+zonbi = "0.3"
+gc-arena = "0.5"

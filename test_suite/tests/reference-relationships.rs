@@ -2,7 +2,7 @@
 
 use jsonapi_deserialize::{deserialize_document, Document, JsonApiDeserialize, Reference};
 
-#[derive(Debug, JsonApiDeserialize, Eq, PartialEq)]
+#[derive(Debug, JsonApiDeserialize, Eq, PartialEq, Default)]
 struct Article {
     id: String,
     title: String,
@@ -18,6 +18,7 @@ struct Article {
 
 #[test]
 fn test_deserialize() {
+    let holder = jsonapi_deserialize::Holder::default();
     let document: Document<Article> = deserialize_document(
         r#"{
             "data": {
@@ -45,6 +46,7 @@ fn test_deserialize() {
                 }
             }
         }"#,
+        &holder
     )
     .unwrap();
 

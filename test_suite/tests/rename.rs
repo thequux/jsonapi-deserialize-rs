@@ -1,29 +1,29 @@
 #![allow(unused)]
 
-use jsonapi_deserialize::{deserialize_document, Document, JsonApiDeserialize};
+use jsonapi_deserialize::{deserialize_document, Document, Holder, JsonApiDeserialize};
 
-#[derive(Debug, JsonApiDeserialize)]
+#[derive(Debug, JsonApiDeserialize, Default)]
 #[json_api(rename_all = "snake_case")]
 struct SnakeCase {
     id: String,
     foo_bar: String,
 }
 
-#[derive(Debug, JsonApiDeserialize)]
+#[derive(Debug, JsonApiDeserialize, Default)]
 #[json_api(rename_all = "pascal_case")]
 struct PascalCase {
     id: String,
     foo_bar: String,
 }
 
-#[derive(Debug, JsonApiDeserialize)]
+#[derive(Debug, JsonApiDeserialize, Default)]
 #[json_api(rename_all = "camel_case")]
 struct CamelCase {
     id: String,
     foo_bar: String,
 }
 
-#[derive(Debug, JsonApiDeserialize)]
+#[derive(Debug, JsonApiDeserialize, Default)]
 struct FieldRename {
     pub id: String,
     #[json_api(rename = "foobar")]
@@ -32,6 +32,7 @@ struct FieldRename {
 
 #[test]
 fn test_snake_case() {
+    let holder = Holder::default();
     let document: Document<SnakeCase> = deserialize_document(
         r#"{
             "data": {
@@ -42,6 +43,7 @@ fn test_snake_case() {
                 }
             }
         }"#,
+        &holder
     )
     .unwrap();
 
@@ -50,6 +52,7 @@ fn test_snake_case() {
 
 #[test]
 fn test_pascal_case() {
+    let holder = Holder::default();
     let document: Document<PascalCase> = deserialize_document(
         r#"{
             "data": {
@@ -60,6 +63,7 @@ fn test_pascal_case() {
                 }
             }
         }"#,
+        &holder
     )
     .unwrap();
 
@@ -68,6 +72,7 @@ fn test_pascal_case() {
 
 #[test]
 fn test_camel_case() {
+    let holder = Holder::default();
     let document: Document<CamelCase> = deserialize_document(
         r#"{
             "data": {
@@ -78,6 +83,7 @@ fn test_camel_case() {
                 }
             }
         }"#,
+        &holder
     )
     .unwrap();
 
@@ -86,6 +92,7 @@ fn test_camel_case() {
 
 #[test]
 fn test_field_rename() {
+    let holder = Holder::default();
     let document: Document<FieldRename> = deserialize_document(
         r#"{
             "data": {
@@ -96,6 +103,7 @@ fn test_field_rename() {
                 }
             }
         }"#,
+        &holder
     )
     .unwrap();
 

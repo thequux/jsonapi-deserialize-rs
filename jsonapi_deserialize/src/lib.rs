@@ -15,3 +15,10 @@ pub use link::Link;
 
 extern crate jsonapi_deserialize_derive;
 pub use jsonapi_deserialize_derive::JsonApiDeserialize;
+
+#[doc(hidden)]
+pub extern crate zonbi;
+#[doc(hidden)]
+pub extern crate bumpalo;
+
+pub use document::Holder;

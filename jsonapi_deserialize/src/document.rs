@@ -1,15 +1,30 @@
-use crate::deserialize::JsonApiDeserialize;
+use std::cell::RefCell;
+use crate::deserialize::{JsonApiDeserialize, JsonApiDrop};
 use crate::link::Link;
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
 
+#[derive(Default)]
+pub struct Holder{
+    pub(crate) bump: bumpalo::Bump,
+    pub(crate) to_free: RefCell<Vec<*mut dyn JsonApiDrop>>
+}
+
+impl Drop for Holder {
+    fn drop(&mut self) {
+        for ptr in self.to_free.borrow_mut().drain(..) {
+            unsafe { std::ptr::drop_in_place(ptr) };
+        }
+    }
+}
+
 #[derive(Debug)]
-pub struct Document<T>
+pub struct Document<'a, T: 'a>
 where
-    T: JsonApiDeserialize,
+    T: JsonApiDeserialize<'a>,
 {
-    pub data: T,
+    pub data: &'a T,
     pub meta: Option<HashMap<String, Value>>,
     pub links: Option<DocumentLinks>,
 }
@@ -54,7 +69,7 @@ pub struct DocumentLinks {
     pub next: Option<Link>,
 }
 
-#[derive(Debug, Deserialize, Eq, PartialEq, Clone)]
+#[derive(Debug, Deserialize, Eq, PartialEq, Clone, Default)]
 pub struct Reference {
     pub id: String,
     #[serde(rename = "type")]

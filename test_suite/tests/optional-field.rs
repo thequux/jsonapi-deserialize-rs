@@ -1,9 +1,10 @@
 #![allow(unused)]
 
 use jsonapi_deserialize::{deserialize_document, Document, JsonApiDeserialize, Reference};
+use zonbi::Zonbi;
 
-#[derive(Debug, JsonApiDeserialize)]
-struct Resource {
+#[derive(Debug, JsonApiDeserialize, Zonbi, Default)]
+struct Resource<'gc>  {
     id: String,
     #[json_api(default)]
     default_string: String,
@@ -17,19 +18,25 @@ struct Resource {
     default_ref: Option<Reference>,
     #[json_api(optional, relationship = "optional")]
     optional_ref: Option<Option<Reference>>,
+
+    #[json_api(optional, relationship = "optional", resource = "Resource")]
+    optional_self_ref: Option<Option<&'gc Resource<'gc>>>,
+
 }
 
 #[test]
 fn test_optional_missing_attribute() {
+    let holder = jsonapi_deserialize::Holder::default();
     let document: Document<Resource> = deserialize_document(
         r#"{
-            "data": {
-                "id": "1",
-                "type": "resource"
-            }
-        }"#,
+                "data": {
+                    "id": "1",
+                    "type": "resource"
+                }
+            }"#,
+        &holder
     )
-    .unwrap();
+        .unwrap();
 
     assert_eq!(document.data.default_string.as_str(), "");
     assert_eq!(document.data.default_option, None);
@@ -39,6 +46,8 @@ fn test_optional_missing_attribute() {
 
 #[test]
 fn test_optional_set_fields() {
+    let holder = jsonapi_deserialize::Holder::default();
+
     let document: Document<Resource> = deserialize_document(
         r#"{
             "data": {
@@ -52,6 +61,7 @@ fn test_optional_set_fields() {
                 }
             }
         }"#,
+        &holder
     )
     .unwrap();
 
@@ -66,6 +76,8 @@ fn test_optional_set_fields() {
 
 #[test]
 fn test_optional_null_field() {
+    let holder = jsonapi_deserialize::Holder::default();
+
     let document: Document<Resource> = deserialize_document(
         r#"{
             "data": {
@@ -75,7 +87,7 @@ fn test_optional_null_field() {
                     "optionalNullable": null
                 }
             }
-        }"#,
+        }"#, &holder
     )
     .unwrap();
 
@@ -84,13 +96,14 @@ fn test_optional_null_field() {
 
 #[test]
 fn test_optional_missing_relationships() {
+    let holder = jsonapi_deserialize::Holder::default();
     let document: Document<Resource> = deserialize_document(
         r#"{
             "data": {
                 "id": "1",
                 "type": "resource"
             }
-        }"#,
+        }"#, &holder
     )
     .unwrap();
 
